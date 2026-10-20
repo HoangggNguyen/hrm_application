@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in | HRM</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="login-page">
+<main class="login-panel">
+    <div class="brand-mark"><i class="bi bi-people-fill"></i></div>
+    <p class="eyebrow">PEOPLE OPERATIONS</p>
+    <h1>Sign in</h1>
+    <p class="text-secondary mb-4">Access your HRM workspace.</p>
+    <div class="alert alert-danger" th:if="${param.error}">Invalid username or password, or this account is disabled.</div>
+    <div class="alert alert-success" th:if="${param.logout}">You have been signed out.</div>
+    <form th:action="@{/login}" method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input id="username" name="username" class="form-control form-control-lg" autocomplete="username" required autofocus>
+        </div>
+        <div class="mb-4">
+            <label for="password" class="form-label">Password</label>
+            <input id="password" name="password" type="password" class="form-control form-control-lg" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary btn-lg w-100" type="submit">Sign in</button>
+    </form>
+</main>
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

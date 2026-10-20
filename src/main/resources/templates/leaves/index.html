@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Leave</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading"><div><p class="eyebrow">TIME AWAY</p><h1>Leave</h1><p class="text-secondary">Requests, balances, and approvals.</p></div></div>
+    <nav class="section-tabs leave-tabs" aria-label="Leave sections">
+        <a href="#my-requests" th:if="${hasEmployee}">My requests</a>
+        <a href="#approvals" th:if="${canApprove}">Pending approvals</a>
+        <a href="#types" th:if="${canManageTypes}">Leave types</a>
+    </nav>
+    <section id="my-requests" class="form-surface mb-4" th:if="${hasEmployee}">
+        <div class="d-flex align-items-center justify-content-between mb-3"><h2 class="mb-0">Leave balances</h2><button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newLeaveModal"><i class="bi bi-plus-lg me-1"></i> New request</button></div>
+        <div class="table-responsive"><table class="table"><thead><tr><th>Type</th><th>Total days</th><th>Used</th><th>Remaining</th></tr></thead><tbody>
+            <tr th:each="balance : ${balances}"><td th:text="${balance.leaveType.name}"></td><td th:text="${balance.total}"></td><td th:text="${balance.used}"></td><td th:text="${balance.total.subtract(balance.used)}"></td></tr>
+            <tr th:if="${balances.empty}"><td colspan="4" class="text-secondary">No balances for this year.</td></tr>
+        </tbody></table></div>
+        <h2 class="mt-4">My requests</h2>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Type</th><th>Dates</th><th>Days</th><th>Status</th><th>Reason</th><th></th></tr></thead><tbody>
+            <tr th:each="request : ${requests}"><td th:text="${request.leaveType.name}"></td><td th:text="|${#temporals.format(request.fromDate, 'dd/MM/yyyy')} - ${#temporals.format(request.toDate, 'dd/MM/yyyy')}|"></td><td th:text="${request.days}"></td><td><span class="status-tag" th:text="${request.status}"></span><small class="d-block text-secondary" th:if="${request.rejectReason != null}" th:text="${request.rejectReason}"></small></td><td th:text="${request.reason}"></td>
+                <td class="text-end"><form th:if="${request.status.name() == 'PENDING'}" th:action="@{/leaves/{id}/cancel(id=${request.id})}" method="post" data-confirm="Cancel this pending leave request?"><button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button></form></td></tr>
+            <tr th:if="${requests.empty}"><td colspan="6" class="text-secondary">No leave requests yet.</td></tr>
+        </tbody></table></div>
+    </section>
+    <section id="approvals" class="form-surface mb-4" th:if="${canApprove}">
+        <h2>Pending approvals</h2>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Days</th><th>Reason</th><th></th></tr></thead><tbody>
+            <tr th:each="request : ${approvals}"><td><span class="fw-semibold" th:text="${request.employee.code}"></span><small class="d-block text-secondary" th:text="${request.employee.fullName}"></small></td><td th:text="${request.leaveType.name}"></td><td th:text="|${#temporals.format(request.fromDate, 'dd/MM/yyyy')} - ${#temporals.format(request.toDate, 'dd/MM/yyyy')}|"></td><td th:text="${request.days}"></td><td th:text="${request.reason}"></td>
+                <td class="text-end text-nowrap"><form class="d-inline" th:action="@{/leaves/{id}/approve(id=${request.id})}" method="post" data-confirm="Approve this leave request?"><button class="btn btn-sm btn-primary" type="submit">Approve</button></form> <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" th:attr="data-bs-target='#rejectLeave' + ${request.id}">Reject</button>
+                    <div class="modal fade" th:id="'rejectLeave' + ${request.id}" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><form th:action="@{/leaves/{id}/reject(id=${request.id})}" method="post"><div class="modal-header"><h3 class="modal-title fs-5">Reject leave request</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><label class="form-label">Reason *</label><textarea class="form-control" name="reason" rows="3" maxlength="500" required></textarea></div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger" type="submit">Reject request</button></div></form></div></div></div>
+                </td></tr>
+            <tr th:if="${approvals.empty}"><td colspan="6" class="text-secondary">No requests need your decision.</td></tr>
+        </tbody></table></div>
+    </section>
+    <section id="types" class="form-surface" th:if="${canManageTypes}">
+        <h2>Leave types</h2>
+        <form th:action="@{/leaves/types}" th:object="${leaveTypeForm}" method="post" class="row g-2 align-items-end mb-4">
+            <div class="col-md-4"><label class="form-label">Name *</label><input class="form-control" th:field="*{name}" maxlength="50" required></div>
+            <div class="col-md-3"><label class="form-label">Days per year *</label><input class="form-control" th:field="*{daysPerYear}" type="number" min="0" required></div>
+            <div class="col-md-3"><div class="form-check mb-2"><input class="form-check-input" th:field="*{paid}" type="checkbox"><label class="form-check-label" for="paid">Paid leave</label></div></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg me-1"></i> Add type</button></div>
+        </form>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Name</th><th>Days per year</th><th>Paid</th><th></th></tr></thead><tbody>
+            <tr th:each="type : ${leaveTypes}"><td colspan="4"><div class="row g-2 align-items-center"><form class="col-10 row g-2 align-items-center" th:action="@{/leaves/types/{id}(id=${type.id})}" method="post"><div class="col-md-5"><input class="form-control form-control-sm" name="name" th:value="${type.name}" required maxlength="50"></div><div class="col-md-3"><input class="form-control form-control-sm" name="daysPerYear" type="number" min="0" th:value="${type.daysPerYear}" required></div><div class="col-md-2"><input class="form-check-input" name="paid" type="checkbox" value="true" th:checked="${type.paid}"><input name="paid" type="hidden" value="false"></div><div class="col-md-2"><button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Save leave type" title="Save"><i class="bi bi-check-lg"></i></button></div></form><div class="col-2 text-end"><form th:action="@{/leaves/types/{id}/delete(id=${type.id})}" method="post" data-confirm="Delete this leave type?"><button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete leave type" title="Delete"><i class="bi bi-trash"></i></button></form></div></div></td></tr>
+            <tr th:if="${leaveTypes.empty}"><td colspan="4" class="text-secondary">No leave types.</td></tr>
+        </tbody></table></div>
+    </section>
+    <div class="modal fade" id="newLeaveModal" tabindex="-1" aria-hidden="true" th:if="${hasEmployee}"><div class="modal-dialog"><div class="modal-content"><form th:action="@{/leaves}" th:object="${requestForm}" method="post"><div class="modal-header"><h2 class="modal-title fs-5">New leave request</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">
+        <div class="mb-3"><label class="form-label">Leave type *</label><select class="form-select" th:field="*{leaveTypeId}" required><option value="">Select type</option><option th:each="type : ${requestTypes}" th:value="${type.id}" th:text="${type.name}"></option></select></div>
+        <div class="row g-2 mb-3"><div class="col"><label class="form-label">From *</label><input class="form-control" type="date" th:field="*{fromDate}" required></div><div class="col"><label class="form-label">To *</label><input class="form-control" type="date" th:field="*{toDate}" required></div></div>
+        <div><label class="form-label">Reason *</label><textarea class="form-control" th:field="*{reason}" rows="3" maxlength="500" required></textarea></div>
+    </div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary" type="submit">Submit request</button></div></form></div></div></div>
+</main>
+</body>
+</html>

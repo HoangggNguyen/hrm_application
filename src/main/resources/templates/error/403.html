@@ -1,0 +1,6 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Access denied</title></head>
+<body><main layout:fragment="content" class="error-view"><p class="eyebrow">403 / ACCESS DENIED</p><h1>This area is restricted.</h1><p class="text-secondary">Your account does not have permission to view this page.</p><a class="btn btn-primary" th:href="@{/dashboard}">Back to dashboard</a></main></body>
+</html>

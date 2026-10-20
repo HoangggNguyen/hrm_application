@@ -1,0 +1,6 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Request could not be completed</title></head>
+<body><main layout:fragment="content" class="error-view"><p class="eyebrow">REQUEST NOT COMPLETED</p><h1>We couldn't complete that request.</h1><p class="text-secondary" th:text="${errorMessage}">Please review the request and try again.</p><a class="btn btn-primary" th:href="@{/dashboard}">Back to dashboard</a></main></body>
+</html>

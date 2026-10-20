@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Payroll period</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading"><div><p class="eyebrow">PAYROLL PERIOD</p><h1 th:text="|${period.month}/${period.year}|">Period</h1><span class="role-pill" th:text="${period.status}"></span></div>
+        <div class="d-flex gap-2" th:if="${period.status.name() == 'DRAFT'}"><form th:action="@{/payroll/{id}/generate(id=${period.id})}" method="post" data-confirm="Generate payslips for this period? Existing draft payslips will be replaced."><button class="btn btn-outline-secondary" type="submit"><i class="bi bi-arrow-repeat me-1"></i> Generate</button></form><form th:action="@{/payroll/{id}/confirm(id=${period.id})}" method="post" data-confirm="Confirm this period? Payslip edits will be locked."><button class="btn btn-primary" type="submit">Confirm</button></form></div>
+        <form th:if="${period.status.name() == 'CONFIRMED'}" th:action="@{/payroll/{id}/pay(id=${period.id})}" method="post" data-confirm="Mark this payroll period as paid?"><button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle me-1"></i> Mark paid</button></form>
+    </div>
+    <section class="form-surface"><h2>Payslips</h2><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Employee</th><th>Base</th><th>Standard days</th><th>Actual days</th><th>Allowance</th><th>Bonus</th><th>Deduction</th><th>Gross</th><th>Net</th><th></th></tr></thead><tbody>
+        <tr th:each="slip : ${payslips}"><td><span class="fw-semibold" th:text="${slip.employee.code}"></span><small class="d-block text-secondary" th:text="${slip.employee.fullName}"></small></td><td th:text="${#numbers.formatDecimal(slip.baseSalary, 0, 'COMMA', 0, 'POINT')}"></td><td th:text="${slip.standardDays}"></td><td th:text="${slip.actualDays}"></td>
+            <td th:text="${#numbers.formatDecimal(slip.allowance, 0, 'COMMA', 0, 'POINT')}"></td><td th:text="${#numbers.formatDecimal(slip.bonus, 0, 'COMMA', 0, 'POINT')}"></td><td th:text="${#numbers.formatDecimal(slip.deduction, 0, 'COMMA', 0, 'POINT')}"></td><td th:text="${#numbers.formatDecimal(slip.gross, 0, 'COMMA', 0, 'POINT')}"></td><td class="fw-semibold" th:text="${#numbers.formatDecimal(slip.netSalary, 0, 'COMMA', 0, 'POINT')}"></td>
+            <td class="text-end text-nowrap"><button class="btn btn-sm btn-outline-secondary" type="button" th:if="${period.status.name() == 'DRAFT'}" data-bs-toggle="collapse" th:attr="data-bs-target='#editSlip' + ${slip.id}" aria-label="Edit payslip" title="Edit"><i class="bi bi-pencil"></i></button><a class="btn btn-sm btn-outline-secondary" th:if="${period.status.name() != 'DRAFT'}" th:href="@{/payroll/payslips/{id}(id=${slip.id})}" aria-label="View payslip" title="View"><i class="bi bi-receipt"></i></a></td>
+        </tr>
+        <tr th:each="slip : ${payslips}" th:if="${period.status.name() == 'DRAFT'}"><td colspan="10" class="p-0"><div class="collapse px-3 py-3 bg-light" th:id="'editSlip' + ${slip.id}"><form th:action="@{/payroll/payslips/{id}(id=${slip.id})}" method="post" class="row g-2 align-items-end"><div class="col-md-3"><label class="form-label">Allowance</label><input class="form-control form-control-sm" type="number" name="allowance" min="0" step="1" th:value="${slip.allowance}" required></div><div class="col-md-3"><label class="form-label">Bonus</label><input class="form-control form-control-sm" type="number" name="bonus" min="0" step="1" th:value="${slip.bonus}" required></div><div class="col-md-3"><label class="form-label">Deduction</label><input class="form-control form-control-sm" type="number" name="deduction" min="0" step="1" th:value="${slip.deduction}" required></div><div class="col-md-3"><button class="btn btn-sm btn-primary" type="submit">Save amounts</button></div></form></div></td></tr>
+        <tr th:if="${payslips.empty}"><td colspan="10" class="text-center text-secondary py-5">No payslips generated for this period.</td></tr>
+    </tbody></table></div></section>
+</main>
+</body>
+</html>

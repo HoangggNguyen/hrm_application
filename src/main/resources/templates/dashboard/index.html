@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Dashboard</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading">
+        <div><p class="eyebrow">OVERVIEW / <span th:text="${role}">ROLE</span></p><h1>Good to see you, <span th:text="${username}">User</span></h1>
+            <p class="text-secondary" th:text="${isManager ? 'Your direct-report team at a glance.' : 'Your people operations at a glance.'}">Your people operations at a glance.</p></div>
+        <span class="role-pill" th:text="${role}">ROLE</span>
+    </div>
+    <section class="metric-grid" th:if="${role != 'EMPLOYEE'}">
+        <div class="metric-item"><span>Total employees</span><strong th:text="${metrics.employees}">0</strong><small>In your scope</small></div>
+        <div class="metric-item"><span>On probation</span><strong th:text="${metrics.probation}">0</strong><small>Current employees</small></div>
+        <div class="metric-item"><span>On leave today</span><strong th:text="${metrics.onLeave}">0</strong><small>Approved leave</small></div>
+        <div class="metric-item"><span>Late today</span><strong th:text="${metrics.late}">0</strong><small>Attendance records</small></div>
+    </section>
+    <div class="dashboard-columns" th:if="${isHrOrAdmin}">
+        <section class="form-surface"><div class="section-heading"><h2>Employees by department</h2></div><div class="chart-wrap"><canvas id="departmentChart" aria-label="Employees by department" role="img"></canvas></div></section>
+        <section class="form-surface"><h2>Contracts expiring soon</h2><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Employee</th><th>End date</th></tr></thead><tbody>
+            <tr th:each="contract : ${expiringContracts}"><td><span class="fw-semibold" th:text="${contract.employee.code}"></span><small class="d-block text-secondary" th:text="${contract.employee.fullName}"></small></td><td th:text="${#temporals.format(contract.endDate, 'dd/MM/yyyy')}"></td></tr><tr th:if="${expiringContracts.empty}"><td colspan="2" class="text-secondary">No contracts expire within 30 days.</td></tr>
+        </tbody></table></div></section>
+    </div>
+    <section class="form-surface mt-4" th:if="${role == 'MANAGER' or role == 'HR' or role == 'ADMIN'}"><div class="section-heading"><h2>Pending leave requests</h2><a class="small text-decoration-none" th:href="@{/leaves}">View all <i class="bi bi-arrow-right"></i></a></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Employee</th><th>Dates</th><th>Days</th><th>Reason</th></tr></thead><tbody>
+        <tr th:each="request : ${pendingApprovals}"><td><span class="fw-semibold" th:text="${request.employee.code}"></span><small class="d-block text-secondary" th:text="${request.employee.fullName}"></small></td><td th:text="|${#temporals.format(request.fromDate, 'dd/MM/yyyy')} - ${#temporals.format(request.toDate, 'dd/MM/yyyy')}|"></td><td th:text="${request.days}"></td><td th:text="${request.reason}"></td></tr><tr th:if="${pendingApprovals.empty}"><td colspan="4" class="text-secondary">No requests need a decision.</td></tr>
+    </tbody></table></div></section>
+    <section class="dashboard-columns" th:if="${role == 'EMPLOYEE'}">
+        <div class="form-surface"><h2>My leave balances</h2><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Type</th><th>Remaining</th></tr></thead><tbody><tr th:each="balance : ${balances}"><td th:text="${balance.leaveType.name}"></td><td th:text="${balance.total.subtract(balance.used)}"></td></tr><tr th:if="${balances.empty}"><td colspan="2" class="text-secondary">No balances for this year.</td></tr></tbody></table></div></div>
+        <div class="form-surface"><h2>Today's attendance</h2><div th:if="${todayAttendance == null}" class="text-secondary">No check-in recorded today.</div><div th:if="${todayAttendance != null}"><span class="status-tag" th:text="${todayAttendance.status}"></span><p class="mt-3 mb-1" th:text="|Check in: ${#temporals.format(todayAttendance.checkIn, 'HH:mm')}|"></p><p class="mb-0" th:text="|Check out: ${todayAttendance.checkOut == null ? '-' : #temporals.format(todayAttendance.checkOut, 'HH:mm')}|"></p></div></div>
+    </section>
+    <script th:if="${isHrOrAdmin}" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script th:if="${isHrOrAdmin}" th:inline="javascript">
+        const departmentLabels = [[${departmentLabels}]];
+        const departmentValues = [[${departmentValues}]];
+        new Chart(document.getElementById('departmentChart'), {
+            type: 'bar',
+            data: { labels: departmentLabels, datasets: [{ data: departmentValues, backgroundColor: ['#174b43', '#e4a343', '#4b8776', '#a9c9b8'], borderRadius: 2, maxBarThickness: 48 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+        });
+    </script>
+</main>
+</body>
+</html>

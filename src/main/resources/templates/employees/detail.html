@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title th:text="${employee.fullName}">Employee</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading">
+        <div><p class="eyebrow" th:text="${employee.code}">EMP0001</p><h1 th:text="${employee.fullName}">Employee name</h1><p class="text-secondary" th:text="|${employee.position.name} / ${employee.department.name}|">Role / Department</p></div>
+        <div class="d-flex gap-2" th:if="${canEdit}"><a class="btn btn-outline-secondary" th:href="@{/employees/{id}/edit(id=${employee.id})}"><i class="bi bi-pencil me-1"></i> Edit</a><button class="btn btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#resignModal" th:if="${employee.status.name() != 'RESIGNED'}">Resign</button></div>
+    </div>
+    <nav class="section-tabs"><a href="#info">Info</a><a href="#contracts">Contracts</a><a href="#leave">Leave</a><a href="#payslips" th:if="${canEdit}">Payslips</a></nav>
+    <section id="info" class="form-surface mb-4">
+        <h2>Personal information</h2><dl class="detail-grid">
+            <div><dt>Gender</dt><dd th:text="${employee.gender}"></dd></div><div><dt>Date of birth</dt><dd th:text="${#temporals.format(employee.dob, 'dd/MM/yyyy')}"></dd></div>
+            <div><dt>Email</dt><dd th:text="${employee.email}"></dd></div><div><dt>Phone</dt><dd th:text="${employee.phone ?: '-'}"></dd></div>
+            <div><dt>ID number</dt><dd th:text="${employee.idNumber}"></dd></div><div><dt>Address</dt><dd th:text="${employee.address ?: '-'}"></dd></div>
+            <div><dt>Manager</dt><dd th:text="${employee.manager == null ? '-' : employee.manager.fullName}"></dd></div><div><dt>Hire date</dt><dd th:text="${#temporals.format(employee.hireDate, 'dd/MM/yyyy')}"></dd></div>
+            <div><dt>Status</dt><dd th:text="${employee.status}"></dd></div><div><dt>Tax code</dt><dd th:text="${employee.taxCode ?: '-'}"></dd></div>
+            <div><dt>Bank</dt><dd th:text="${employee.bankName ?: '-'}"></dd></div><div><dt>Bank account</dt><dd th:text="${employee.bankAccount ?: '-'}"></dd></div>
+        </dl>
+    </section>
+    <section id="contracts" class="form-surface mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3"><h2 class="mb-0">Contracts</h2><button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#contractForm" th:if="${canEdit}"><i class="bi bi-plus-lg me-1"></i> Add contract</button></div>
+        <div class="collapse mb-4" id="contractForm" th:if="${canEdit}"><form th:action="@{/employees/{id}/contracts(id=${employee.id})}" th:object="${contractForm}" method="post" class="row g-2 align-items-end">
+            <div class="col-md-3"><label class="form-label">Type</label><select class="form-select" th:field="*{type}" required><option value="">Select</option><option value="PROBATION">Probation</option><option value="FIXED_TERM">Fixed term</option><option value="INDEFINITE">Indefinite</option></select></div>
+            <div class="col-md-2"><label class="form-label">Start date</label><input type="date" class="form-control" th:field="*{startDate}" required></div>
+            <div class="col-md-2"><label class="form-label">End date</label><input type="date" class="form-control" th:field="*{endDate}"></div>
+            <div class="col-md-3"><label class="form-label">Base salary (VND)</label><input type="number" min="1" step="1" class="form-control" th:field="*{baseSalary}" required></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Save</button></div>
+        </form></div>
+        <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Type</th><th>Start</th><th>End</th><th>Base salary</th><th>Status</th></tr></thead>
+            <tbody><tr th:each="contract : ${contracts}"><td th:text="${contract.type}"></td><td th:text="${#temporals.format(contract.startDate, 'dd/MM/yyyy')}"></td><td th:text="${contract.endDate == null ? '-' : #temporals.format(contract.endDate, 'dd/MM/yyyy')}"></td><td th:text="${#numbers.formatDecimal(contract.baseSalary, 0, 'COMMA', 0, 'POINT')}"></td><td th:text="${contract.status}"></td></tr><tr th:if="${contracts.empty}"><td colspan="5" class="text-secondary">No contracts recorded.</td></tr></tbody>
+        </table></div>
+    </section>
+    <section id="leave" class="form-surface mb-4"><h2>Leave balances <span class="text-secondary fw-normal" th:text="${#temporals.year(#temporals.createNow())}"></span></h2>
+        <div class="table-responsive"><table class="table mb-0"><thead><tr><th>Type</th><th>Total days</th><th>Used</th><th>Remaining</th></tr></thead>
+            <tbody><tr th:each="balance : ${balances}"><td th:text="${balance.leaveType.name}"></td><td th:text="${balance.total}"></td><td th:text="${balance.used}"></td><td th:text="${balance.total.subtract(balance.used)}"></td></tr><tr th:if="${balances.empty}"><td colspan="4" class="text-secondary">No leave balances for this year.</td></tr></tbody>
+        </table></div>
+        <h2 class="mt-4">Request history</h2><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Type</th><th>Dates</th><th>Days</th><th>Status</th><th>Reason</th></tr></thead><tbody>
+            <tr th:each="request : ${leaveRequests}"><td th:text="${request.leaveType.name}"></td><td th:text="|${#temporals.format(request.fromDate, 'dd/MM/yyyy')} - ${#temporals.format(request.toDate, 'dd/MM/yyyy')}|"></td><td th:text="${request.days}"></td><td th:text="${request.status}"></td><td th:text="${request.reason}"></td></tr><tr th:if="${leaveRequests.empty}"><td colspan="5" class="text-secondary">No leave requests recorded.</td></tr>
+        </tbody></table></div>
+    </section>
+    <section id="payslips" class="form-surface" th:if="${canEdit}"><h2>Payslips</h2><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Period</th><th>Status</th><th>Gross</th><th>Net salary</th><th></th></tr></thead><tbody>
+        <tr th:each="slip : ${payslips}"><td th:text="|${slip.period.month}/${slip.period.year}|"></td><td th:text="${slip.period.status}"></td><td th:text="${#numbers.formatDecimal(slip.gross, 0, 'COMMA', 0, 'POINT')}"></td><td th:text="${#numbers.formatDecimal(slip.netSalary, 0, 'COMMA', 0, 'POINT')}"></td><td class="text-end"><a class="btn btn-sm btn-outline-secondary" th:href="@{/payroll/payslips/{id}(id=${slip.id})}" aria-label="Open payslip" title="Open"><i class="bi bi-receipt"></i></a></td></tr><tr th:if="${payslips.empty}"><td colspan="5" class="text-secondary">No confirmed or paid payslips.</td></tr>
+    </tbody></table></div></section>
+    <div class="modal fade" id="resignModal" tabindex="-1" aria-labelledby="resignTitle" aria-hidden="true">
+        <div class="modal-dialog"><div class="modal-content"><form th:action="@{/employees/{id}/resign(id=${employee.id})}" method="post" data-confirm="Record this employee's resignation? This action disables their account and expires their active contract.">
+            <div class="modal-header"><h2 class="modal-title fs-5" id="resignTitle">Record resignation</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body"><label class="form-label" for="resignDate">Resignation date</label><input id="resignDate" name="resignDate" type="date" class="form-control" required></div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-danger">Confirm resignation</button></div>
+        </form></div></div>
+    </div>
+</main>
+</body>
+</html>

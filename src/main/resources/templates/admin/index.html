@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Administration</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading"><div><p class="eyebrow">SYSTEM CONTROL</p><h1>Administration</h1><p class="text-secondary">Manage accounts, work settings, and holidays.</p></div></div>
+    <nav class="section-tabs" aria-label="Administration sections"><a href="#accounts">Accounts</a><a href="#settings">Settings</a><a href="#holidays">Holidays</a></nav>
+    <section id="accounts" class="form-surface mb-4">
+        <h2>Create account</h2>
+        <form th:action="@{/admin/users}" th:object="${accountForm}" method="post" class="row g-2 align-items-end mb-4">
+            <div class="col-md-3"><label class="form-label">Username *</label><input class="form-control" th:field="*{username}" maxlength="50" required></div>
+            <div class="col-md-3"><label class="form-label">Password *</label><input class="form-control" th:field="*{password}" type="password" minlength="8" required></div>
+            <div class="col-md-2"><label class="form-label">Role *</label><select class="form-select" th:field="*{role}" required><option value="">Select</option><option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option></select></div>
+            <div class="col-md-2"><label class="form-label">Employee</label><select class="form-select" th:field="*{employeeId}"><option value="">No employee</option><option th:each="employee : ${availableEmployees}" th:value="${employee.id}" th:text="|${employee.code} - ${employee.fullName}|"></option></select></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg me-1"></i> Create</button></div>
+        </form>
+        <h2>Accounts</h2><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Username</th><th>Role</th><th>Enabled</th><th>Employee</th><th>Actions</th></tr></thead><tbody>
+            <tr th:each="account : ${accounts}"><td class="fw-semibold" th:text="${account.username}"></td><td>
+                <span class="status-tag" th:if="${account.id == currentUserId}" th:text="${account.role}"></span>
+                <form th:if="${account.id != currentUserId}" th:action="@{/admin/users/{id}(id=${account.id})}" method="post" class="d-flex align-items-center gap-2"><select class="form-select form-select-sm" name="role"><option th:each="role : ${roles}" th:value="${role}" th:text="${role}" th:selected="${role == account.role}"></option></select>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="enabled" value="true" th:checked="${account.enabled}"><input type="hidden" name="enabled" value="false"><label class="form-check-label small">Enabled</label></div><button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Save account" title="Save"><i class="bi bi-check-lg"></i></button></form>
+                <small th:if="${account.id == currentUserId}" class="d-block text-secondary">Current administrator</small></td>
+                <td><span class="status-tag" th:text="${account.enabled ? 'Enabled' : 'Disabled'}"></span></td><td th:text="${account.employee == null ? '-' : account.employee.code + ' - ' + account.employee.fullName}"></td>
+                <td><details><summary class="small text-success">Reset password</summary><form th:action="@{/admin/users/{id}/password(id=${account.id})}" method="post" class="d-flex gap-2 mt-2"><input class="form-control form-control-sm" type="password" name="password" minlength="8" placeholder="New password" required><button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Reset password" title="Reset"><i class="bi bi-key"></i></button></form></details></td>
+            </tr>
+        </tbody></table></div>
+    </section>
+    <section id="settings" class="form-surface mb-4"><h2>Work settings</h2>
+        <form th:action="@{/admin/settings}" th:object="${settingsForm}" method="post" class="row g-3 align-items-end">
+            <div class="col-md-3"><label class="form-label">Work start</label><input class="form-control" type="time" th:field="*{workStart}" required></div>
+            <div class="col-md-3"><label class="form-label">Work end</label><input class="form-control" type="time" th:field="*{workEnd}" required></div>
+            <div class="col-md-3"><label class="form-label">Late grace (minutes)</label><input class="form-control" type="number" min="0" th:field="*{lateGraceMinutes}" required></div>
+            <div class="col-md-3"><button class="btn btn-primary" type="submit">Save settings</button></div>
+        </form>
+    </section>
+    <section id="holidays" class="form-surface"><h2>Holidays</h2>
+        <form th:action="@{/admin/holidays}" th:object="${holidayForm}" method="post" class="row g-2 align-items-end mb-4">
+            <div class="col-md-4"><label class="form-label">Date *</label><input class="form-control" type="date" th:field="*{holidayDate}" required></div>
+            <div class="col-md-5"><label class="form-label">Name *</label><input class="form-control" th:field="*{name}" maxlength="100" required></div>
+            <div class="col-md-3"><button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i> Add holiday</button></div>
+        </form>
+        <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Date</th><th>Name</th><th></th></tr></thead><tbody>
+            <tr th:each="holiday : ${holidays}"><td th:text="${#temporals.format(holiday.holidayDate, 'dd/MM/yyyy')}"></td><td th:text="${holiday.name}"></td><td class="text-end"><form th:action="@{/admin/holidays/{id}/delete(id=${holiday.id})}" method="post" data-confirm="Delete this holiday?"><button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete holiday" title="Delete"><i class="bi bi-trash"></i></button></form></td></tr>
+            <tr th:if="${holidays.empty}"><td colspan="3" class="text-secondary">No holidays configured.</td></tr>
+        </tbody></table></div>
+    </section>
+</main>
+</body>
+</html>

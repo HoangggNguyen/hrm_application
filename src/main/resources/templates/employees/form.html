@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title th:text="${formTitle}">Employee</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading"><div><p class="eyebrow">EMPLOYEE RECORD</p><h1 th:text="${formTitle}">Employee</h1></div><span class="role-pill" th:if="${employeeCode}" th:text="${employeeCode}"></span></div>
+    <form th:object="${employeeForm}" th:action="${employeeId == null ? '/employees/new' : '/employees/' + employeeId + '/edit'}" method="post" class="form-surface">
+        <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+        <section class="form-section">
+            <h2>Personal information</h2>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label" for="fullName">Full name *</label><input id="fullName" class="form-control" th:field="*{fullName}" required><div class="field-error" th:errors="*{fullName}"></div></div>
+                <div class="col-md-3"><label class="form-label" for="gender">Gender *</label><select id="gender" class="form-select" th:field="*{gender}" required><option value="">Select</option><option th:each="item : ${genders}" th:value="${item}" th:text="${item}"></option></select><div class="field-error" th:errors="*{gender}"></div></div>
+                <div class="col-md-3"><label class="form-label" for="dob">Date of birth *</label><input id="dob" type="date" class="form-control" th:field="*{dob}" required><div class="field-error" th:errors="*{dob}"></div></div>
+                <div class="col-md-4"><label class="form-label" for="phone">Phone</label><input id="phone" class="form-control" th:field="*{phone}" maxlength="20"><div class="field-error" th:errors="*{phone}"></div></div>
+                <div class="col-md-4"><label class="form-label" for="email">Email *</label><input id="email" type="email" class="form-control" th:field="*{email}" required><div class="field-error" th:errors="*{email}"></div></div>
+                <div class="col-md-4"><label class="form-label" for="idNumber">ID number *</label><input id="idNumber" class="form-control" th:field="*{idNumber}" required><div class="field-error" th:errors="*{idNumber}"></div></div>
+                <div class="col-12"><label class="form-label" for="address">Address</label><input id="address" class="form-control" th:field="*{address}"></div>
+            </div>
+        </section>
+        <section class="form-section">
+            <h2>Job information</h2>
+            <div class="row g-3">
+                <div class="col-md-4"><label class="form-label" for="departmentId">Department *</label><select id="departmentId" class="form-select" th:field="*{departmentId}" required><option value="">Select</option><option th:each="item : ${departments}" th:value="${item.id}" th:text="${item.name}"></option></select><div class="field-error" th:errors="*{departmentId}"></div></div>
+                <div class="col-md-4"><label class="form-label" for="positionId">Position *</label><select id="positionId" class="form-select" th:field="*{positionId}" required><option value="">Select</option><option th:each="item : ${positions}" th:value="${item.id}" th:text="${item.name}"></option></select><div class="field-error" th:errors="*{positionId}"></div></div>
+                <div class="col-md-4"><label class="form-label" for="managerId">Manager</label><select id="managerId" class="form-select" th:field="*{managerId}"><option value="">No manager</option><option th:each="item : ${managers}" th:value="${item.id}" th:text="|${item.code} - ${item.fullName}|"></option></select></div>
+                <div class="col-md-4"><label class="form-label" for="hireDate">Hire date *</label><input id="hireDate" type="date" class="form-control" th:field="*{hireDate}" required><div class="field-error" th:errors="*{hireDate}"></div></div>
+                <div class="col-md-4"><label class="form-label" for="status">Status *</label><select id="status" class="form-select" th:field="*{status}" required><option th:each="item : ${statuses}" th:if="${item.name() != 'RESIGNED' or allowResignedStatus}" th:value="${item}" th:text="${item}"></option></select><div class="field-error" th:errors="*{status}"></div></div>
+                <div class="col-md-4"><label class="form-label" for="taxCode">Tax code</label><input id="taxCode" class="form-control" th:field="*{taxCode}"></div>
+                <div class="col-md-6"><label class="form-label" for="bankName">Bank name</label><input id="bankName" class="form-control" th:field="*{bankName}"></div>
+                <div class="col-md-6"><label class="form-label" for="bankAccount">Bank account</label><input id="bankAccount" class="form-control" th:field="*{bankAccount}"></div>
+            </div>
+        </section>
+        <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" th:href="${employeeId == null ? '/employees' : '/employees/' + employeeId}">Cancel</a><button class="btn btn-primary" type="submit">Save employee</button></div>
+    </form>
+</main>
+</body>
+</html>

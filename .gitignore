@@ -1,0 +1,28 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+
+# IDE metadata
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/*.log
+
+# Runtime output and local configuration
+*.log
+application-local.yml
+application-local.yaml
+.env
+.env.*
+!.env.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini

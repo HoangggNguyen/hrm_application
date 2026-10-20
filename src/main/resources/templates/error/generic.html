@@ -1,0 +1,6 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Something went wrong</title></head>
+<body><main layout:fragment="content" class="error-view"><p class="eyebrow" th:text="${status}">ERROR</p><h1>Something went wrong.</h1><p class="text-secondary">Please return to your dashboard and try again.</p><a class="btn btn-primary" th:href="@{/dashboard}">Back to dashboard</a></main></body>
+</html>

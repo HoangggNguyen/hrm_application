@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Catalog</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading"><div><p class="eyebrow">ORGANIZATION SETUP</p><h1>Catalog</h1><p class="text-secondary">Manage departments and positions used in employee records.</p></div></div>
+    <nav class="section-tabs" aria-label="Catalog sections"><a href="#departments">Departments</a><a href="#positions">Positions</a></nav>
+    <section id="departments" class="form-surface mb-4">
+        <h2>Departments</h2>
+        <form th:action="@{/catalog/departments}" th:object="${departmentForm}" method="post" class="row g-2 align-items-end mb-4">
+            <div class="col-md-2"><label class="form-label">Code *</label><input class="form-control" th:field="*{code}" maxlength="20" required></div>
+            <div class="col-md-4"><label class="form-label">Name *</label><input class="form-control" th:field="*{name}" maxlength="100" required></div>
+            <div class="col-md-4"><label class="form-label">Manager</label><select class="form-select" th:field="*{managerId}"><option value="">No manager</option><option th:each="manager : ${managers}" th:value="${manager.id}" th:text="|${manager.code} - ${manager.fullName}|"></option></select></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg me-1"></i> Add</button></div>
+        </form>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Code</th><th>Name</th><th>Manager</th><th></th></tr></thead><tbody>
+            <tr th:each="department : ${departments}"><td><span th:text="${department.code}"></span></td><td><form th:action="@{/catalog/departments/{id}(id=${department.id})}" method="post" class="d-flex gap-2"><input type="hidden" name="code" th:value="${department.code}"><input class="form-control form-control-sm" name="name" th:value="${department.name}" required></td><td><select class="form-select form-select-sm" name="managerId"><option value="">No manager</option><option th:each="manager : ${managers}" th:value="${manager.id}" th:text="${manager.fullName}" th:selected="${department.manager != null and department.manager.id == manager.id}"></option></select></td><td class="text-end text-nowrap"><button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Save department" title="Save"><i class="bi bi-check-lg"></i></button></form><form th:action="@{/catalog/departments/{id}/delete(id=${department.id})}" method="post" class="d-inline" data-confirm="Delete this department?"><button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete department" title="Delete"><i class="bi bi-trash"></i></button></form></td></tr>
+            <tr th:if="${departments.empty}"><td colspan="4" class="text-secondary">No departments.</td></tr>
+        </tbody></table></div>
+    </section>
+    <section id="positions" class="form-surface">
+        <h2>Positions</h2>
+        <form th:action="@{/catalog/positions}" th:object="${positionForm}" method="post" class="row g-2 align-items-end mb-4">
+            <div class="col-md-8"><label class="form-label">Position name *</label><input class="form-control" th:field="*{name}" maxlength="100" required></div>
+            <div class="col-md-4"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-lg me-1"></i> Add position</button></div>
+        </form>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Name</th><th></th></tr></thead><tbody>
+            <tr th:each="position : ${positions}"><td><form th:action="@{/catalog/positions/{id}(id=${position.id})}" method="post" class="d-flex gap-2"><input class="form-control form-control-sm" name="name" th:value="${position.name}" required><button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Save position" title="Save"><i class="bi bi-check-lg"></i></button></form></td><td class="text-end"><form th:action="@{/catalog/positions/{id}/delete(id=${position.id})}" method="post" data-confirm="Delete this position?"><button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete position" title="Delete"><i class="bi bi-trash"></i></button></form></td></tr>
+            <tr th:if="${positions.empty}"><td colspan="2" class="text-secondary">No positions.</td></tr>
+        </tbody></table></div>
+    </section>
+</main>
+</body>
+</html>

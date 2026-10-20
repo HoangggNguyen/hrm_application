@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payslip</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="payslip-page">
+<main class="payslip-sheet">
+    <header class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4"><div><p class="eyebrow">NORTHSTAR / PAYROLL</p><h1>Payslip</h1><p class="text-secondary mb-0" th:text="|${payslip.period.month}/${payslip.period.year}|"></p></div><button class="btn btn-primary" type="button" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print</button></header>
+    <section class="row g-3 mb-4"><div class="col-6"><small class="text-secondary d-block">Employee</small><strong th:text="${payslip.employee.fullName}"></strong></div><div class="col-6"><small class="text-secondary d-block">Employee code</small><strong th:text="${payslip.employee.code}"></strong></div><div class="col-6"><small class="text-secondary d-block">Department</small><strong th:text="${payslip.employee.department.name}"></strong></div><div class="col-6"><small class="text-secondary d-block">Position</small><strong th:text="${payslip.employee.position.name}"></strong></div></section>
+    <section class="table-responsive"><table class="table"><thead><tr><th>Pay item</th><th class="text-end">Amount (VND)</th></tr></thead><tbody>
+        <tr><td>Base salary</td><td class="text-end" th:text="${#numbers.formatDecimal(payslip.baseSalary, 0, 'COMMA', 0, 'POINT')}"></td></tr><tr><td>Allowance</td><td class="text-end" th:text="${#numbers.formatDecimal(payslip.allowance, 0, 'COMMA', 0, 'POINT')}"></td></tr><tr><td>Bonus</td><td class="text-end" th:text="${#numbers.formatDecimal(payslip.bonus, 0, 'COMMA', 0, 'POINT')}"></td></tr><tr><td>Deduction</td><td class="text-end" th:text="${#numbers.formatDecimal(payslip.deduction, 0, 'COMMA', 0, 'POINT')}"></td></tr><tr class="fw-semibold"><td>Gross salary</td><td class="text-end" th:text="${#numbers.formatDecimal(payslip.gross, 0, 'COMMA', 0, 'POINT')}"></td></tr><tr class="fw-bold payslip-total"><td>Net salary</td><td class="text-end" th:text="${#numbers.formatDecimal(payslip.netSalary, 0, 'COMMA', 0, 'POINT')}"></td></tr>
+    </tbody></table></section>
+    <p class="small text-secondary mt-4" th:text="|Working days: ${payslip.actualDays} / ${payslip.standardDays}|"></p>
+</main>
+</body>
+</html>

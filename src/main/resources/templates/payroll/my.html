@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>My payslips</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="page-heading"><div><p class="eyebrow">COMPENSATION</p><h1>My payslips</h1><p class="text-secondary">Confirmed and paid payroll records.</p></div></div>
+    <section class="form-surface"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Period</th><th>Status</th><th>Gross</th><th>Net salary</th><th></th></tr></thead><tbody>
+        <tr th:each="slip : ${payslips}"><td th:text="|${slip.period.month}/${slip.period.year}|"></td><td><span class="status-tag" th:text="${slip.period.status}"></span></td><td th:text="${#numbers.formatDecimal(slip.gross, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td><td class="fw-semibold" th:text="${#numbers.formatDecimal(slip.netSalary, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td><td class="text-end"><a class="btn btn-sm btn-outline-secondary" th:href="@{/payroll/payslips/{id}(id=${slip.id})}" aria-label="View payslip" title="View payslip"><i class="bi bi-receipt"></i></a></td></tr>
+        <tr th:if="${payslips.empty}"><td colspan="5" class="text-center text-secondary py-5">No confirmed payslips available.</td></tr>
+    </tbody></table></div></section>
+</main>
+</body>
+</html>
