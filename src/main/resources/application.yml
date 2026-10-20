@@ -10,11 +10,11 @@ spring:
     properties:
       hibernate:
         jdbc:
-          time_zone: Asia/Ho_Chi_Minh
+          time_zone: Asia/Ha_Noi
   flyway:
     enabled: true
   jackson:
-    time-zone: Asia/Ho_Chi_Minh
+    time-zone: Asia/Ha_Noi
   thymeleaf:
     cache: false
 server:
